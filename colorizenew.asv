@@ -27,9 +27,9 @@ current_index = 0;
 pixel_vals = zeros(m*n*9, 1);
 temp_vals = [];
 
-for i=1:m
-    for j=1:n
-        current_pixel_num = (i-1) *n + j;
+for j=1:n
+    for i=1:m
+        current_pixel_num = (j-1) *m + i;
         if (~colored_pixels(i,j))
             %find neighbors
             for x=i-1:i+1
@@ -46,11 +46,11 @@ for i=1:m
             temp_vals =[temp_vals current_pixel_intensity];
             num_neighbors = size(temp_vals);
             variance = var(temp_vals);
-            sigma = variance^(.5);
-            
-            temp_vals = exp(-(temp_vals - current_pixel_intensity).^2)/(2*variance);
+            sigma = variance^(.5);   
+  
+            temp_vals = exp(-(temp_vals - current_pixel_intensity).^2/(2*variance));
             %normalize
-            temp_vals = temp_vals(1:num_neighbors)/sum(temp_vals(1:num_neighbors));
+            temp_vals(1: = temp_vals(1:num_neighbors)/sum(temp_vals(1:num_neighbors));
             pixel_vals(current_index-num_neighbors+1:current_index) = -temp_vals; 
             
             %A = D-W, W = pixel_vals, D = Identity matrix    
@@ -58,7 +58,7 @@ for i=1:m
 
         current_index = current_index + 1;
         rows(current_index) = current_pixel_num;
-        columns(current_index) = m * (i - 1) + i;
+        columns(current_index) = m * (j - 1) + i;
         pixel_vals(current_index) = 1;
     end
 end
@@ -74,6 +74,6 @@ for i=2:3
     x = A\b;
     result_image(:,:,i) = reshape(x,m,n,1);
 end
-
+result_image = ntsc2rgb(result_image);
 figure;
 imshow(result_image);

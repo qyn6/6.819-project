@@ -46,12 +46,12 @@ for j=1:n
             temp_vals =[temp_vals current_pixel_intensity];
             num_neighbors = size(temp_vals);
             variance = var(temp_vals);
-            sigma = variance^(.5);
-            
-            temp_vals = exp(-(temp_vals - current_pixel_intensity).^2)/(2*variance);
+            sigma = variance^(.5);   
+  
+            temp_vals = exp(-(temp_vals - current_pixel_intensity).^2/(2*variance));
             %normalize
-            temp_vals = temp_vals(1:num_neighbors)/sum(temp_vals(1:num_neighbors));
-            pixel_vals(current_index-num_neighbors+1:current_index) = -temp_vals; 
+            temp_vals(1:num_neighbors) = temp_vals(1:num_neighbors)/sum(temp_vals(1:num_neighbors));
+            pixel_vals(current_index-num_neighbors+1:current_index) = -temp_vals(1:num_neighbors); 
             
             %A = D-W, W = pixel_vals, D = Identity matrix    
         end
