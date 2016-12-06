@@ -17,19 +17,16 @@ ntsc_image(:,:,2:3) = ntsc_colored(:,:,2:3);
 colored_pixels = ntsc_image(:,:,2);
 colored_pixels(colored_pixels~=0) = 1;
 
-out = 1;
-
 [m,n]= size(ntsc_image(:,:,1));
 columns = zeros(m*n*9, 1); %8 neighbors + thing itself
 rows = zeros(m*n*9, 1);
-count_index = 0;
 current_index = 0;
 pixel_vals = zeros(m*n*9, 1);
-temp_vals = [];
 
 for j=1:n
     for i=1:m
-        current_pixel_num = (j-1) *m + i;
+        temp_vals = [];
+        current_pixel_num = (j-1)*m + i;
         if (~colored_pixels(i,j))
             %find neighbors
             for x=i-1:i+1
@@ -44,18 +41,26 @@ for j=1:n
             end
             current_pixel_intensity = ntsc_image(i,j,1);
             temp_vals =[temp_vals current_pixel_intensity];
-            num_neighbors = size(temp_vals);
-            variance = var(temp_vals);
-            sigma = variance^(.5);
+            num_neighbors = size(temp_vals,2)-1;
+            variance = var(temp_vals)*.6;
+            mgv=min((temp_vals-current_pixel_intensity).^2);
             
-            temp_vals = exp(-(temp_vals - current_pixel_intensity).^2)/(2*variance);
+            if (variance<(-mgv/log(0.01)))
+                variance=-mgv/log(0.01);
+            end
+            if (variance<0.000002)
+                variance=0.000002;
+            end
+            
+            temp_vals(1:num_neighbors) = exp(-(temp_vals(1:num_neighbors) - current_pixel_intensity).^2)/(variance)
+            %temp_vals(1:num_neighbors)=1+(temp_vals-mean(current_pixel_intensity))*(current_pixel_intensity-mean(current_pixel_intensity))/variance
             %normalize
-            temp_vals = temp_vals(1:num_neighbors)/sum(temp_vals(1:num_neighbors));
-            pixel_vals(current_index-num_neighbors+1:current_index) = -temp_vals; 
+            temp_vals(1:num_neighbors) = temp_vals(1:num_neighbors)/sum(temp_vals(1:num_neighbors));
+            pixel_vals(current_index-num_neighbors+1:current_index) = -temp_vals(1:num_neighbors);
             
-            %A = D-W, W = pixel_vals, D = Identity matrix    
+            %A = D-W, W = pixel_vals, D = Identity matrix
         end
-
+        
         current_index = current_index + 1;
         rows(current_index) = current_pixel_num;
         columns(current_index) = m * (j - 1) + i;
@@ -63,16 +68,16 @@ for j=1:n
     end
 end
 
-A = sparse(rows(1:current_index), columns(1:current_index), pixel_vals(1:current_index), m*n, m*n);
+A = sparse(rows(1:current_index), columns(1:current_index), pixel_vals(1:current_index), current_pixel_num, m*n);
 b = zeros(size(A,1), 1);
 colored_pixel_indices = find(colored_pixels);
 result_image = ntsc_image(:,:,1);
 
-for i=2:3
-    channel = ntsc_image(:,:,i);
+for r=2:3
+    channel = ntsc_image(:,:,r);
     b(colored_pixel_indices) = channel(colored_pixel_indices);
-    x = A\b;
-    result_image(:,:,i) = reshape(x,m,n,1);
+    res = A\b;
+    result_image(:,:,r) = reshape(res,m,n,1);
 end
 result_image = ntsc2rgb(result_image);
 figure;
