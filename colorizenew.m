@@ -52,7 +52,7 @@ for j=1:n
                 variance=0.000002;
             end
             
-            temp_vals(1:num_neighbors) = exp(-(temp_vals(1:num_neighbors) - current_pixel_intensity).^2)/(variance)
+            temp_vals(1:num_neighbors) = exp(-(temp_vals(1:num_neighbors) - current_pixel_intensity).^2)/(variance);S
             %temp_vals(1:num_neighbors)=1+(temp_vals-mean(current_pixel_intensity))*(current_pixel_intensity-mean(current_pixel_intensity))/variance
             %normalize
             temp_vals(1:num_neighbors) = temp_vals(1:num_neighbors)/sum(temp_vals(1:num_neighbors));
