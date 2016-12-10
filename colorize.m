@@ -80,7 +80,7 @@ for j=1:n
                 csig=0.000002;
             end
             
-            gvals(1:tlen)=exp(-(gvals(1:tlen)-t_val).^2/csig)
+            gvals(1:tlen)=exp(-(gvals(1:tlen)-t_val).^2/csig);
             gvals(1:tlen)=gvals(1:tlen)/sum(gvals(1:tlen));
             vals(len-tlen+1:len)=-gvals(1:tlen);
         end
